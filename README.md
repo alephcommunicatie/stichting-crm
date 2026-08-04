@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# RelatieCRM — Stichting Relatiebeheer
 
-## Getting Started
+Een relatiebeheer-CRM (contacten, organisaties, pipeline/kansen, taken en een
+dashboard) gebouwd met Next.js + Supabase.
 
-First, run the development server:
+## Wat zit erin
+
+- **Contacten & organisaties** — CRUD, zoeken/filteren, contactpersonen per organisatie
+- **Contactmomenten** — tijdlijn per contact/organisatie (bellen, e-mail, afspraak, notitie, evenement, gift)
+- **Pipeline** — sleepbaar kanban-bord voor kansen (subsidieaanvragen, donaties, samenwerkingen)
+- **Taken & follow-ups** — met deadline, prioriteit en koppeling aan contact/organisatie/kans
+- **Dashboard** — kerncijfers en grafieken (pipeline-waarde per fase, contactmomenten per maand)
+- **Login/registratie** via Supabase Auth (e-mail + wachtwoord), gedeeld team-account (RLS: elke ingelogde gebruiker ziet alle data)
+
+## Techniek
+
+- Next.js 16 (App Router) + TypeScript + Tailwind CSS 4
+- Supabase (Postgres, Auth, Row Level Security)
+- @dnd-kit voor het sleepbare pipeline-bord
+- Recharts voor de dashboard-grafieken
+
+## Supabase-project
+
+Dit project is al gekoppeld aan een live Supabase-database (organisatie **road
+stichtingen**, project **gospel stichtingen**). De `.env.production` bevat de
+project-URL en de publieke (anon) API-sleutel — dit is veilig om mee te
+deployen, want alle toegang loopt via Row Level Security-policies.
+
+Het datamodel (tabellen `organizations`, `contacts`, `tags`, `interactions`,
+`pipeline_stages`, `deals`, `tasks`, `profiles`) en de standaard pipeline-fases
+en tags staan al klaar in de database.
+
+## Lokaal draaien
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ga naar `http://localhost:3000`, maak een account aan via "Account maken" en
+log in.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Live zetten (Vercel)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Jullie Vercel-account (team **aleph**) is al gekoppeld. Twee manieren:
 
-## Learn More
+**Optie A — Vercel CLI (snelst):**
+```bash
+npm install -g vercel
+vercel login
+vercel --prod
+```
+Vercel detecteert automatisch dat het een Next.js-project is en de
+omgevingsvariabelen uit `.env.production` worden bij de build ingelezen.
 
-To learn more about Next.js, take a look at the following resources:
+**Optie B — via de Vercel-dashboard:**
+Ga naar vercel.com → New Project → Import, sleep deze map (of een GitHub-repo
+met deze code) erin, en klik Deploy.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Volgende stappen / uitbreidingen
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Dit is een stevige basis, geen 1-op-1 kopie van Zoho — voor verdere
+uitbreiding kun je denken aan: e-mailintegratie (verzenden vanuit de app),
+geautomatiseerde herinneringen, export naar Excel/CSV, gebruikersrollen en
+rechten, en een activiteitenlog per gebruiker.
