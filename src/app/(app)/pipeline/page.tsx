@@ -149,7 +149,7 @@ export default function PipelinePage() {
   const activeDeal = deals.find((d) => d.id === activeId);
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-[calc(100vh-3.5rem)] lg:h-screen">
       <PageHeader
         title="Pipeline"
         description={`${deals.length} openstaande kansen · ${formatCurrency(totalPipelineValue)}`}
@@ -160,7 +160,7 @@ export default function PipelinePage() {
         }
       />
 
-      <div className="flex-1 overflow-x-auto px-8 py-5">
+      <div className="flex-1 overflow-x-auto px-4 sm:px-8 py-5">
         {!loading && (
           <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
             <div className="flex gap-4 h-full">

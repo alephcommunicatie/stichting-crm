@@ -67,9 +67,9 @@ export default function ContactsPage() {
         }
       />
 
-      <div className="px-8 py-5">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="relative flex-1 max-w-sm">
+      <div className="px-4 sm:px-8 py-5">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+          <div className="relative flex-1 sm:max-w-sm">
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
             <input
               className="input pl-8"
@@ -79,7 +79,7 @@ export default function ContactsPage() {
             />
           </div>
           <select
-            className="input max-w-[200px]"
+            className="input sm:max-w-[200px]"
             value={relationFilter}
             onChange={(e) => setRelationFilter(e.target.value)}
           >
@@ -92,7 +92,7 @@ export default function ContactsPage() {
           </select>
         </div>
 
-        <div className="card overflow-hidden">
+        <div className="card overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border text-left text-xs text-muted uppercase tracking-wide">

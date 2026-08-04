@@ -76,7 +76,7 @@ export default function TasksPage() {
         }
       />
 
-      <div className="px-8 py-5">
+      <div className="px-4 sm:px-8 py-5">
         <div className="flex gap-2 mb-4">
           {(["open", "overdue", "done", "all"] as Filter[]).map((f) => (
             <button
@@ -91,7 +91,7 @@ export default function TasksPage() {
           ))}
         </div>
 
-        <div className="card overflow-hidden">
+        <div className="card overflow-x-auto">
           {!loading && filtered.length === 0 && (
             <p className="text-sm text-muted text-center py-10">Geen taken gevonden.</p>
           )}

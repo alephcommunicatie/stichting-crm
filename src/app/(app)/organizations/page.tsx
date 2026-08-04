@@ -44,7 +44,7 @@ export default function OrganizationsPage() {
         }
       />
 
-      <div className="px-8 py-5">
+      <div className="px-4 sm:px-8 py-5">
         <div className="relative max-w-sm mb-4">
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
           <input

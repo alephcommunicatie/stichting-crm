@@ -67,7 +67,7 @@ export default function ContactDetailPage() {
         }
       />
 
-      <div className="px-8 py-6 max-w-6xl">
+      <div className="px-4 sm:px-8 py-6 max-w-6xl">
         <Link href="/contacts" className="text-sm text-muted hover:text-primary flex items-center gap-1 mb-4">
           <ArrowLeft size={14} /> Terug naar contacten
         </Link>
@@ -87,7 +87,7 @@ export default function ContactDetailPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="col-span-1 space-y-4">
             <div className="card p-4 space-y-3 text-sm">
               {contact.email && (

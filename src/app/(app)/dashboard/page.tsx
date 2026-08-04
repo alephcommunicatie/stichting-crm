@@ -93,7 +93,7 @@ export default function DashboardPage() {
     <div>
       <PageHeader title="Dashboard" description="Overzicht van je relatiebeheer" />
 
-      <div className="px-8 py-6 space-y-6">
+      <div className="px-4 sm:px-8 py-6 space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard label="Actieve relaties" value={loading ? "-" : activeContacts.length} icon={Users} hint={`${contacts.length} totaal`} />
           <StatCard label="Pipeline-waarde" value={loading ? "-" : formatCurrency(pipelineValue)} icon={Wallet} hint={`${openDeals.length} openstaande kansen`} />
