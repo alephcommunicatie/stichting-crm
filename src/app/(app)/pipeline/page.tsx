@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import PageHeader from "@/components/PageHeader";
 import DealFormModal from "@/components/deals/DealFormModal";
@@ -20,7 +19,7 @@ import {
   useDraggable,
 } from "@dnd-kit/core";
 
-function DealCard({ deal }: { deal: Deal }) {
+function DealCard({ deal, onEdit }: { deal: Deal; onEdit?: (deal: Deal) => void }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: deal.id,
   });
@@ -42,10 +41,14 @@ function DealCard({ deal }: { deal: Deal }) {
         >
           <GripVertical size={14} />
         </button>
-        <Link href={deal.contact_id ? `/contacts/${deal.contact_id}` : deal.organization_id ? `/organizations/${deal.organization_id}` : "#"} className="min-w-0 flex-1">
-          <p className="text-sm font-medium truncate">{deal.title}</p>
+        <button
+          type="button"
+          onClick={() => onEdit?.(deal)}
+          className="min-w-0 flex-1 text-left cursor-pointer"
+        >
+          <p className="text-sm font-medium truncate hover:text-primary">{deal.title}</p>
           <p className="text-xs text-muted mt-1">{formatCurrency(deal.amount, deal.currency)}</p>
-        </Link>
+        </button>
       </div>
     </div>
   );
@@ -55,10 +58,12 @@ function StageColumn({
   stage,
   deals,
   total,
+  onEditDeal,
 }: {
   stage: PipelineStage;
   deals: Deal[];
   total: number;
+  onEditDeal: (deal: Deal) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: stage.id });
 
@@ -77,7 +82,7 @@ function StageColumn({
       </div>
       <div className="p-2 flex-1 min-h-[100px] overflow-y-auto">
         {deals.map((d) => (
-          <DealCard key={d.id} deal={d} />
+          <DealCard key={d.id} deal={d} onEdit={onEditDeal} />
         ))}
       </div>
     </div>
@@ -90,6 +95,7 @@ export default function PipelinePage() {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+  const [editingDeal, setEditingDeal] = useState<Deal | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
@@ -170,6 +176,7 @@ export default function PipelinePage() {
                   stage={stage}
                   deals={dealsByStage[stage.id] || []}
                   total={(dealsByStage[stage.id] || []).reduce((s, d) => s + Number(d.amount), 0)}
+                  onEditDeal={setEditingDeal}
                 />
               ))}
             </div>
@@ -179,6 +186,12 @@ export default function PipelinePage() {
       </div>
 
       <DealFormModal open={modalOpen} onClose={() => setModalOpen(false)} onSaved={load} />
+      <DealFormModal
+        open={!!editingDeal}
+        onClose={() => setEditingDeal(null)}
+        onSaved={load}
+        deal={editingDeal}
+      />
     </div>
   );
 }
