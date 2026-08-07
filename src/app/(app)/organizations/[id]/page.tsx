@@ -9,10 +9,11 @@ import { formatDate, initials, fullName } from "@/lib/utils";
 import PageHeader from "@/components/PageHeader";
 import Badge from "@/components/ui/Badge";
 import OrganizationFormModal from "@/components/organizations/OrganizationFormModal";
+import ContactFormModal from "@/components/contacts/ContactFormModal";
 import InteractionTimeline from "@/components/InteractionTimeline";
 import RelatedTasks from "@/components/RelatedTasks";
 import RelatedDeals from "@/components/RelatedDeals";
-import { ArrowLeft, Mail, Phone, MapPin, Globe, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Mail, Phone, MapPin, Globe, Pencil, Trash2, Plus } from "lucide-react";
 
 export default function OrganizationDetailPage() {
   const params = useParams<{ id: string }>();
@@ -22,6 +23,7 @@ export default function OrganizationDetailPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
+  const [contactModalOpen, setContactModalOpen] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -123,7 +125,15 @@ export default function OrganizationDetailPage() {
             )}
 
             <div className="card p-4">
-              <h3 className="text-sm font-semibold mb-3">Contactpersonen</h3>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold">Contactpersonen</h3>
+                <button
+                  className="btn-secondary flex items-center gap-1 text-xs py-1.5"
+                  onClick={() => setContactModalOpen(true)}
+                >
+                  <Plus size={14} /> Persoon
+                </button>
+              </div>
               {contacts.length === 0 && <p className="text-sm text-muted">Geen contactpersonen.</p>}
               <ul className="space-y-2">
                 {contacts.map((c) => (
@@ -157,6 +167,12 @@ export default function OrganizationDetailPage() {
       </div>
 
       <OrganizationFormModal open={editOpen} onClose={() => setEditOpen(false)} onSaved={load} organization={org} />
+      <ContactFormModal
+        open={contactModalOpen}
+        onClose={() => setContactModalOpen(false)}
+        onSaved={load}
+        defaultOrganizationId={org.id}
+      />
     </div>
   );
 }
