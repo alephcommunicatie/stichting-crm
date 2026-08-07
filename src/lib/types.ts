@@ -137,6 +137,37 @@ export interface Task {
   deals?: Deal | null;
 }
 
+export type EmailProvider = "gmail" | "outlook";
+
+export interface EmailAccount {
+  id: string;
+  user_id: string;
+  provider: EmailProvider;
+  email_address: string;
+  token_expires_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SyncedEmail {
+  id: string;
+  account_id: string;
+  provider_message_id: string;
+  thread_id: string | null;
+  subject: string | null;
+  snippet: string | null;
+  from_email: string | null;
+  from_name: string | null;
+  to_emails: string | null;
+  received_at: string | null;
+  contact_id: string | null;
+  organization_id: string | null;
+  converted_deal_id: string | null;
+  created_at: string;
+  contacts?: Contact | null;
+  organizations?: Organization | null;
+}
+
 // Minimal Database type placeholder so @supabase/ssr generics compile.
 export type Database = Record<string, unknown>;
 

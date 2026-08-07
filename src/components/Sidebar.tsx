@@ -10,6 +10,7 @@ import {
   Building2,
   KanbanSquare,
   CheckSquare,
+  Mail,
   LogOut,
   Menu,
   X,
@@ -22,6 +23,7 @@ const NAV = [
   { href: "/organizations", label: "Organisaties", icon: Building2 },
   { href: "/pipeline", label: "Pipeline", icon: KanbanSquare },
   { href: "/tasks", label: "Taken", icon: CheckSquare },
+  { href: "/email", label: "E-mail", icon: Mail },
 ];
 
 export default function Sidebar({

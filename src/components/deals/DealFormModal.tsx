@@ -12,6 +12,7 @@ export default function DealFormModal({
   deal,
   defaultContactId,
   defaultOrganizationId,
+  initialTitle,
 }: {
   open: boolean;
   onClose: () => void;
@@ -19,6 +20,7 @@ export default function DealFormModal({
   deal?: Deal | null;
   defaultContactId?: string | null;
   defaultOrganizationId?: string | null;
+  initialTitle?: string;
 }) {
   const supabase = createClient();
   const [stages, setStages] = useState<PipelineStage[]>([]);
@@ -51,10 +53,17 @@ export default function DealFormModal({
         notes: deal.notes || "",
       });
     } else {
-      setForm({ title: "", amount: "0", stage_id: "", expected_close_date: "", probability: "50", notes: "" });
+      setForm({
+        title: initialTitle || "",
+        amount: "0",
+        stage_id: "",
+        expected_close_date: "",
+        probability: "50",
+        notes: "",
+      });
     }
     setError(null);
-  }, [open, deal]);
+  }, [open, deal, initialTitle]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
