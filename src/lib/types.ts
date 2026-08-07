@@ -88,6 +88,8 @@ export interface Interaction {
   created_by: string | null;
   created_at: string;
   profiles?: Profile | null;
+  contacts?: Contact | null;
+  organizations?: Organization | null;
 }
 
 export interface PipelineStage {
@@ -137,7 +139,7 @@ export interface Task {
   deals?: Deal | null;
 }
 
-export type EmailProvider = "gmail" | "outlook";
+export type EmailProvider = "gmail" | "outlook" | "imap";
 
 export interface EmailAccount {
   id: string;
@@ -145,6 +147,17 @@ export interface EmailAccount {
   provider: EmailProvider;
   email_address: string;
   token_expires_at: string | null;
+  imap_host: string | null;
+  imap_port: number | null;
+  imap_secure: boolean | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CalendarFeedToken {
+  id: string;
+  user_id: string;
+  token: string;
   created_at: string;
   updated_at: string;
 }

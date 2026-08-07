@@ -10,6 +10,7 @@ import {
   Building2,
   KanbanSquare,
   CheckSquare,
+  CalendarDays,
   Mail,
   LogOut,
   Menu,
@@ -23,6 +24,7 @@ const NAV = [
   { href: "/organizations", label: "Organisaties", icon: Building2 },
   { href: "/pipeline", label: "Pipeline", icon: KanbanSquare },
   { href: "/tasks", label: "Taken", icon: CheckSquare },
+  { href: "/agenda", label: "Agenda", icon: CalendarDays },
   { href: "/email", label: "E-mail", icon: Mail },
 ];
 
