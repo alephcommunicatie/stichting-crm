@@ -6,19 +6,31 @@ import { createClient } from "@/lib/supabase/client";
 import PageHeader from "@/components/PageHeader";
 import Badge from "@/components/ui/Badge";
 import DealFormModal from "@/components/deals/DealFormModal";
-import { EmailAccount, SyncedEmail } from "@/lib/types";
+import ImapAccountModal from "@/components/email/ImapAccountModal";
+import { EmailAccount, EmailProvider, SyncedEmail } from "@/lib/types";
 import { formatDateTime } from "@/lib/utils";
-import { Mail, RefreshCw, Link2, CheckCircle2 } from "lucide-react";
+import { Mail, RefreshCw, Link2, CheckCircle2, Server } from "lucide-react";
+
+const PROVIDER_LABEL: Record<EmailProvider, string> = {
+  gmail: "Gmail",
+  outlook: "Microsoft 365",
+  imap: "Eigen mailserver",
+};
 
 export default function EmailPage() {
   const supabase = createClient();
-  const [account, setAccount] = useState<EmailAccount | null>(null);
+  const [accounts, setAccounts] = useState<EmailAccount[]>([]);
   const [emails, setEmails] = useState<SyncedEmail[]>([]);
   const [loading, setLoading] = useState(true);
-  const [syncing, setSyncing] = useState(false);
+  const [syncingProvider, setSyncingProvider] = useState<EmailProvider | null>(null);
   const [syncError, setSyncError] = useState<string | null>(null);
   const [urlError, setUrlError] = useState<string | null>(null);
   const [convertingEmail, setConvertingEmail] = useState<SyncedEmail | null>(null);
+  const [imapModalOpen, setImapModalOpen] = useState(false);
+
+  const gmailAccount = accounts.find((a) => a.provider === "gmail") || null;
+  const outlookAccount = accounts.find((a) => a.provider === "outlook") || null;
+  const imapAccount = accounts.find((a) => a.provider === "imap") || null;
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -31,13 +43,11 @@ export default function EmailPage() {
       data: { user },
     } = await supabase.auth.getUser();
 
-    const { data: accountData } = await supabase
+    const { data: accountsData } = await supabase
       .from("email_accounts")
       .select("*")
-      .eq("provider", "gmail")
-      .eq("user_id", user?.id || "")
-      .maybeSingle();
-    setAccount(accountData as EmailAccount | null);
+      .eq("user_id", user?.id || "");
+    setAccounts((accountsData as EmailAccount[]) || []);
 
     const { data: emailsData } = await supabase
       .from("synced_emails")
@@ -52,18 +62,20 @@ export default function EmailPage() {
     load();
   }, [load]);
 
-  async function handleSync() {
-    setSyncing(true);
+  async function handleSync(provider: EmailProvider) {
+    setSyncingProvider(provider);
     setSyncError(null);
     try {
-      const res = await fetch("/api/gmail/sync", { method: "POST" });
+      const endpoint =
+        provider === "gmail" ? "/api/gmail/sync" : provider === "outlook" ? "/api/microsoft/sync" : "/api/imap/sync";
+      const res = await fetch(endpoint, { method: "POST" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Synchroniseren mislukt");
       await load();
     } catch (err) {
       setSyncError(err instanceof Error ? err.message : "Synchroniseren mislukt");
     } finally {
-      setSyncing(false);
+      setSyncingProvider(null);
     }
   }
 
@@ -89,50 +101,96 @@ export default function EmailPage() {
     load();
   }
 
+  function syncButton(provider: EmailProvider, account: EmailAccount | null, label: string) {
+    if (account) {
+      return (
+        <button
+          key={provider}
+          className="btn-secondary flex items-center gap-1.5"
+          onClick={() => handleSync(provider)}
+          disabled={syncingProvider === provider}
+        >
+          <RefreshCw size={15} className={syncingProvider === provider ? "animate-spin" : ""} />
+          {syncingProvider === provider ? "Synchroniseren..." : `Sync ${label}`}
+        </button>
+      );
+    }
+    if (provider === "imap") {
+      return (
+        <button
+          key={provider}
+          className="btn-secondary flex items-center gap-1.5"
+          onClick={() => setImapModalOpen(true)}
+        >
+          <Server size={15} /> Eigen mailserver koppelen
+        </button>
+      );
+    }
+    return (
+      <a
+        key={provider}
+        href={provider === "gmail" ? "/api/auth/gmail/start" : "/api/auth/microsoft/start"}
+        className={provider === "gmail" ? "btn-secondary flex items-center gap-1.5" : "btn-primary flex items-center gap-1.5"}
+      >
+        <Link2 size={15} /> {label} koppelen
+      </a>
+    );
+  }
+
   return (
     <div>
       <PageHeader
         title="E-mail"
-        description={account ? `Gekoppeld: ${account.email_address}` : "Nog geen mailbox gekoppeld"}
+        description={
+          accounts.length > 0
+            ? accounts.map((a) => `${PROVIDER_LABEL[a.provider]}: ${a.email_address}`).join(" · ")
+            : "Nog geen mailbox gekoppeld"
+        }
         action={
-          account ? (
-            <button className="btn-secondary flex items-center gap-1.5" onClick={handleSync} disabled={syncing}>
-              <RefreshCw size={15} className={syncing ? "animate-spin" : ""} />
-              {syncing ? "Synchroniseren..." : "Sync nu"}
-            </button>
-          ) : (
-            <a href="/api/auth/gmail/start" className="btn-primary flex items-center gap-1.5">
-              <Link2 size={15} /> Gmail koppelen
-            </a>
-          )
+          <div className="flex flex-wrap items-center gap-2">
+            {syncButton("gmail", gmailAccount, "Gmail")}
+            {syncButton("outlook", outlookAccount, "Microsoft 365")}
+            {syncButton("imap", imapAccount, "eigen mailserver")}
+          </div>
         }
       />
 
       <div className="px-4 sm:px-8 py-6 space-y-4">
-        {urlError && (
-          <div className="card p-3 text-sm text-danger">Koppelen mislukt: {urlError}</div>
-        )}
+        {urlError && <div className="card p-3 text-sm text-danger">Koppelen mislukt: {urlError}</div>}
         {syncError && <div className="card p-3 text-sm text-danger">{syncError}</div>}
 
-        {!account && !loading && (
+        {accounts.length === 0 && !loading && (
           <div className="card p-8 text-center">
             <Mail size={28} className="mx-auto text-muted mb-3" />
             <p className="text-sm font-medium mb-1">Nog geen mailbox gekoppeld</p>
             <p className="text-sm text-muted mb-4 max-w-md mx-auto">
-              Koppel je Gmail-account om binnenkomende e-mails te zien en met één klik om te zetten naar een kans op
-              de pipeline.
+              Koppel Gmail, Microsoft 365, of de mailbox van je eigen hostingprovider (bijv. Vimexx) om binnenkomende
+              e-mails te zien en met één klik om te zetten naar een kans op de pipeline. Je kunt meerdere mailboxen
+              tegelijk koppelen.
             </p>
-            <a href="/api/auth/gmail/start" className="btn-primary inline-flex items-center gap-1.5">
-              <Link2 size={15} /> Gmail koppelen
-            </a>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <a href="/api/auth/gmail/start" className="btn-secondary inline-flex items-center gap-1.5">
+                <Link2 size={15} /> Gmail koppelen
+              </a>
+              <a href="/api/auth/microsoft/start" className="btn-primary inline-flex items-center gap-1.5">
+                <Link2 size={15} /> Microsoft 365 koppelen
+              </a>
+              <button
+                type="button"
+                className="btn-secondary inline-flex items-center gap-1.5"
+                onClick={() => setImapModalOpen(true)}
+              >
+                <Server size={15} /> Eigen mailserver koppelen
+              </button>
+            </div>
           </div>
         )}
 
-        {account && (
+        {accounts.length > 0 && (
           <div className="card overflow-hidden">
             {!loading && emails.length === 0 && (
               <p className="text-sm text-muted text-center py-10">
-                Nog geen e-mails gesynchroniseerd. Klik op &quot;Sync nu&quot;.
+                Nog geen e-mails gesynchroniseerd. Klik op een van de sync-knoppen hierboven.
               </p>
             )}
             <ul>
@@ -188,6 +246,8 @@ export default function EmailPage() {
         defaultOrganizationId={convertingEmail?.organization_id}
         initialTitle={convertingEmail?.subject || undefined}
       />
+
+      <ImapAccountModal open={imapModalOpen} onClose={() => setImapModalOpen(false)} onConnected={load} />
     </div>
   );
 }
