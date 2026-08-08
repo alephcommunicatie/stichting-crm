@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useActiveOrg } from "@/components/OrgProvider";
 import Modal from "@/components/ui/Modal";
 import { Task, TaskPriority, TASK_PRIORITY_LABELS } from "@/lib/types";
 
@@ -23,6 +24,7 @@ export default function TaskFormModal({
   defaultDealId?: string | null;
 }) {
   const supabase = createClient();
+  const { activeOrgId } = useActiveOrg();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
@@ -62,7 +64,7 @@ export default function TaskFormModal({
       due_date: form.due_date ? new Date(form.due_date).toISOString() : null,
       priority: form.priority,
       contact_id: task?.contact_id ?? defaultContactId ?? null,
-      organization_id: task?.organization_id ?? defaultOrganizationId ?? null,
+      organization_id: task?.organization_id ?? defaultOrganizationId ?? activeOrgId,
       deal_id: task?.deal_id ?? defaultDealId ?? null,
       created_by: user?.id || null,
     };

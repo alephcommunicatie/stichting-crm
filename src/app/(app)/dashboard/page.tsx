@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useActiveOrg } from "@/components/OrgProvider";
 import PageHeader from "@/components/PageHeader";
 import StatCard from "@/components/StatCard";
 import { Deal, Task, PipelineStage, Interaction, Contact } from "@/lib/types";
@@ -27,6 +28,7 @@ const SEQUENTIAL_BLUE = "#2a78d6";
 
 export default function DashboardPage() {
   const supabase = createClient();
+  const { activeOrgId } = useActiveOrg();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
   const [stages, setStages] = useState<PipelineStage[]>([]);
@@ -37,11 +39,16 @@ export default function DashboardPage() {
   useEffect(() => {
     async function load() {
       const [c, d, s, t, i] = await Promise.all([
-        supabase.from("contacts").select("*"),
-        supabase.from("deals").select("*"),
+        supabase.from("contacts").select("*").eq("organization_id", activeOrgId),
+        supabase.from("deals").select("*").eq("organization_id", activeOrgId),
         supabase.from("pipeline_stages").select("*").order("position"),
-        supabase.from("tasks").select("*"),
-        supabase.from("interactions").select("*").order("interaction_date", { ascending: false }).limit(500),
+        supabase.from("tasks").select("*").eq("organization_id", activeOrgId),
+        supabase
+          .from("interactions")
+          .select("*")
+          .eq("organization_id", activeOrgId)
+          .order("interaction_date", { ascending: false })
+          .limit(500),
       ]);
       setContacts((c.data as Contact[]) || []);
       setDeals((d.data as Deal[]) || []);
@@ -51,7 +58,8 @@ export default function DashboardPage() {
       setLoading(false);
     }
     load();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeOrgId]);
 
   const openDeals = useMemo(() => deals.filter((d) => d.status === "open"), [deals]);
   const pipelineValue = openDeals.reduce((s, d) => s + Number(d.amount), 0);

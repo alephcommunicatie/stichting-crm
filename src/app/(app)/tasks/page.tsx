@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { useActiveOrg } from "@/components/OrgProvider";
 import PageHeader from "@/components/PageHeader";
 import Badge from "@/components/ui/Badge";
 import TaskFormModal from "@/components/tasks/TaskFormModal";
@@ -20,6 +21,7 @@ type Filter = "open" | "done" | "all" | "overdue";
 
 export default function TasksPage() {
   const supabase = createClient();
+  const { activeOrgId } = useActiveOrg();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>("open");
@@ -30,6 +32,7 @@ export default function TasksPage() {
     const { data } = await supabase
       .from("tasks")
       .select("*, contacts(*), organizations(*)")
+      .eq("organization_id", activeOrgId)
       .order("due_date", { ascending: true, nullsFirst: false });
     setTasks((data as Task[]) || []);
     setLoading(false);
@@ -37,7 +40,8 @@ export default function TasksPage() {
 
   useEffect(() => {
     load();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeOrgId]);
 
   async function toggleDone(task: Task) {
     setTasks((prev) =>

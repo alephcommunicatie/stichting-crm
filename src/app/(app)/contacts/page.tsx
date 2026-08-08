@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { useActiveOrg } from "@/components/OrgProvider";
 import PageHeader from "@/components/PageHeader";
 import Badge from "@/components/ui/Badge";
 import ContactFormModal from "@/components/contacts/ContactFormModal";
@@ -22,6 +23,7 @@ const RELATION_COLORS: Record<string, string> = {
 
 export default function ContactsPage() {
   const supabase = createClient();
+  const { activeOrgId } = useActiveOrg();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -33,6 +35,7 @@ export default function ContactsPage() {
     const { data } = await supabase
       .from("contacts")
       .select("*, organizations(*)")
+      .eq("organization_id", activeOrgId)
       .order("created_at", { ascending: false });
     setContacts((data as Contact[]) || []);
     setLoading(false);
@@ -41,7 +44,7 @@ export default function ContactsPage() {
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [activeOrgId]);
 
   const filtered = useMemo(() => {
     return contacts.filter((c) => {

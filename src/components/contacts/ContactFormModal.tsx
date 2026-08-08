@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useActiveOrg } from "@/components/OrgProvider";
 import Modal from "@/components/ui/Modal";
-import { Contact, Organization, RELATION_TYPE_LABELS, RelationType } from "@/lib/types";
+import { Contact, RELATION_TYPE_LABELS, RelationType } from "@/lib/types";
 
 export default function ContactFormModal({
   open,
@@ -19,7 +20,7 @@ export default function ContactFormModal({
   defaultOrganizationId?: string | null;
 }) {
   const supabase = createClient();
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const { activeOrgId } = useActiveOrg();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,11 +40,6 @@ export default function ContactFormModal({
 
   useEffect(() => {
     if (!open) return;
-    supabase
-      .from("organizations")
-      .select("*")
-      .order("name")
-      .then(({ data }) => setOrganizations((data as Organization[]) || []));
 
     if (contact) {
       setForm({
@@ -65,7 +61,7 @@ export default function ContactFormModal({
         last_name: "",
         email: "",
         phone: "",
-        organization_id: defaultOrganizationId || "",
+        organization_id: defaultOrganizationId || activeOrgId,
         relation_type: "overig",
         status: "actief",
         address: "",
@@ -85,7 +81,7 @@ export default function ContactFormModal({
 
     const payload = {
       ...form,
-      organization_id: form.organization_id || null,
+      organization_id: form.organization_id || activeOrgId,
       last_name: form.last_name || null,
       email: form.email || null,
       phone: form.phone || null,
@@ -151,36 +147,19 @@ export default function ContactFormModal({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="label">Type relatie</label>
-            <select
-              className="input"
-              value={form.relation_type}
-              onChange={(e) => setForm({ ...form, relation_type: e.target.value as RelationType })}
-            >
-              {Object.entries(RELATION_TYPE_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="label">Organisatie</label>
-            <select
-              className="input"
-              value={form.organization_id}
-              onChange={(e) => setForm({ ...form, organization_id: e.target.value })}
-            >
-              <option value="">Geen</option>
-              {organizations.map((org) => (
-                <option key={org.id} value={org.id}>
-                  {org.name}
-                </option>
-              ))}
-            </select>
-          </div>
+        <div>
+          <label className="label">Type relatie</label>
+          <select
+            className="input"
+            value={form.relation_type}
+            onChange={(e) => setForm({ ...form, relation_type: e.target.value as RelationType })}
+          >
+            {Object.entries(RELATION_TYPE_LABELS).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="grid grid-cols-3 gap-3">

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { useActiveOrg } from "@/components/OrgProvider";
 import PageHeader from "@/components/PageHeader";
 import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
@@ -128,6 +129,7 @@ function dateHeaderLabel(dateKey: string): string {
 
 export default function AgendaPage() {
   const supabase = createClient();
+  const { activeOrgId } = useActiveOrg();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [interactions, setInteractions] = useState<Interaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -212,11 +214,13 @@ export default function AgendaPage() {
       supabase
         .from("tasks")
         .select("*, contacts(*), organizations(*)")
+        .eq("organization_id", activeOrgId)
         .not("due_date", "is", null)
         .order("due_date", { ascending: true }),
       supabase
         .from("interactions")
         .select("*, contacts(*), organizations(*)")
+        .eq("organization_id", activeOrgId)
         .in("type", APPOINTMENT_TYPES)
         .order("interaction_date", { ascending: true }),
     ]);
@@ -228,7 +232,7 @@ export default function AgendaPage() {
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [activeOrgId]);
 
   async function toggleDone(task: Task) {
     setTasks((prev) =>

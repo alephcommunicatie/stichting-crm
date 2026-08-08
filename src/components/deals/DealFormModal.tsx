@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { useActiveOrg } from "@/components/OrgProvider";
 import Modal from "@/components/ui/Modal";
 import { Deal, PipelineStage } from "@/lib/types";
 
@@ -23,6 +24,7 @@ export default function DealFormModal({
   initialTitle?: string;
 }) {
   const supabase = createClient();
+  const { activeOrgId } = useActiveOrg();
   const [stages, setStages] = useState<PipelineStage[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -85,7 +87,7 @@ export default function DealFormModal({
       probability: Number(form.probability) || 0,
       notes: form.notes || null,
       contact_id: deal?.contact_id ?? defaultContactId ?? null,
-      organization_id: deal?.organization_id ?? defaultOrganizationId ?? null,
+      organization_id: deal?.organization_id ?? defaultOrganizationId ?? activeOrgId,
       created_by: user?.id || null,
     };
 

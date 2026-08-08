@@ -15,6 +15,7 @@ import {
   LogOut,
   Menu,
   X,
+  Repeat,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -31,9 +32,13 @@ const NAV = [
 export default function Sidebar({
   userEmail,
   userName,
+  activeOrgName,
+  showSwitcher,
 }: {
   userEmail?: string | null;
   userName?: string | null;
+  activeOrgName?: string | null;
+  showSwitcher?: boolean;
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -154,6 +159,23 @@ export default function Sidebar({
             <X size={18} />
           </button>
         </div>
+
+        {activeOrgName && (
+          <div className="px-3 pt-3">
+            <div className="px-2 py-2 rounded-lg bg-gray-50 border border-border">
+              <p className="text-[10px] uppercase tracking-wide text-muted">Stichting</p>
+              <p className="text-sm font-medium truncate">{activeOrgName}</p>
+              {showSwitcher && (
+                <Link
+                  href="/choose-organization"
+                  className="mt-1 inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                >
+                  <Repeat size={12} /> Wissel van stichting
+                </Link>
+              )}
+            </div>
+          </div>
+        )}
 
         {navLinks}
         {userFooter}
