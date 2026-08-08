@@ -55,6 +55,7 @@ export default function DashboardPage() {
         throw new Error(data?.error || "Kiezen mislukt");
       }
       router.refresh();
+      setSelecting(null);
     } catch (err) {
       setPickError(err instanceof Error ? err.message : "Kiezen mislukt");
       setSelecting(null);
@@ -192,11 +193,58 @@ export default function DashboardPage() {
     );
   }
 
+  const showOrgSwitcher = memberships.length > 1 || isDeveloper;
+
   return (
     <div>
       <PageHeader title="Dashboard" description="Overzicht van je relatiebeheer" />
 
       <div className="px-4 sm:px-8 py-6 space-y-6">
+        {showOrgSwitcher && (
+          <div>
+            <p className="text-xs font-medium text-muted mb-2">Jouw organisaties</p>
+            {pickError && (
+              <div className="mb-2 text-sm text-danger bg-danger/10 border border-danger/20 rounded-lg px-3 py-2 max-w-md">
+                {pickError}
+              </div>
+            )}
+            <div className="flex flex-wrap gap-2">
+              {memberships.map((m) => {
+                const isActive = !isAllOrgsMode && m.id === activeOrgId;
+                return (
+                  <button
+                    key={m.id}
+                    onClick={() => chooseOrganization(m.id)}
+                    disabled={selecting !== null}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors disabled:opacity-60 ${
+                      isActive
+                        ? "bg-primary text-white border-primary"
+                        : "bg-white text-foreground border-border hover:border-primary"
+                    }`}
+                  >
+                    <Building2 size={14} />
+                    {m.name}
+                  </button>
+                );
+              })}
+              {isDeveloper && (
+                <button
+                  onClick={() => chooseOrganization(ALL_ORGS_ID)}
+                  disabled={selecting !== null}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors disabled:opacity-60 ${
+                    isAllOrgsMode
+                      ? "bg-[#d97706] text-white border-[#d97706]"
+                      : "bg-white text-foreground border-border border-dashed hover:border-[#d97706]"
+                  }`}
+                >
+                  <Wrench size={14} />
+                  Alle organisaties
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard label="Actieve relaties" value={loading ? "-" : activeContacts.length} icon={Users} hint={`${contacts.length} totaal`} />
           <StatCard label="Pipeline-waarde" value={loading ? "-" : formatCurrency(pipelineValue)} icon={Wallet} hint={`${openDeals.length} openstaande kansen`} />
