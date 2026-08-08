@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import Sidebar from "@/components/Sidebar";
@@ -57,21 +56,19 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       ? cookieOrgId
       : null;
 
-  if (!activeOrgId) {
-    if (memberships.length === 1 && !isDeveloper) {
-      activeOrgId = memberships[0].organization_id;
-    } else {
-      // Developers always land on the picker so they can choose "alle organisaties" too.
-      redirect("/choose-organization");
-    }
+  // A single non-developer membership needs no choice; everyone else picks
+  // on the dashboard itself (empty activeOrgId = "not chosen yet").
+  if (!activeOrgId && memberships.length === 1 && !isDeveloper) {
+    activeOrgId = memberships[0].organization_id;
   }
 
   const active = memberships.find((m) => m.organization_id === activeOrgId);
-  const activeOrgName = activeOrgId === ALL_ORGS_ID ? "Alle organisaties (developer)" : active?.organizations?.name || "";
+  const activeOrgName =
+    activeOrgId === ALL_ORGS_ID ? "Alle organisaties (developer)" : active?.organizations?.name || "";
 
   return (
     <OrgProvider
-      activeOrgId={activeOrgId!}
+      activeOrgId={activeOrgId || ""}
       activeOrgName={activeOrgName}
       isDeveloper={isDeveloper}
       memberships={memberships.map((m) => ({

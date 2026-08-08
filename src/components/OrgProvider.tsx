@@ -10,6 +10,9 @@ type OrgContextValue = {
   memberships: OrgOption[];
   isDeveloper: boolean;
   isAllOrgsMode: boolean;
+  // true once a real organization (or "alle organisaties") has been chosen;
+  // false right after login, before the dashboard's org-picker has been used.
+  hasActiveOrg: boolean;
   // Safe organization_id to use when writing new records: the active org,
   // or the first real membership when browsing "alle organisaties".
   writeOrgId: string;
@@ -31,11 +34,12 @@ export default function OrgProvider({
   isDeveloper: boolean;
 }) {
   const isAllOrgsMode = activeOrgId === "all";
+  const hasActiveOrg = activeOrgId !== "";
   const writeOrgId = isAllOrgsMode ? memberships[0]?.id || activeOrgId : activeOrgId;
 
   return (
     <OrgContext.Provider
-      value={{ activeOrgId, activeOrgName, memberships, isDeveloper, isAllOrgsMode, writeOrgId }}
+      value={{ activeOrgId, activeOrgName, memberships, isDeveloper, isAllOrgsMode, hasActiveOrg, writeOrgId }}
     >
       {children}
     </OrgContext.Provider>

@@ -10,6 +10,7 @@ import TaskFormModal from "@/components/tasks/TaskFormModal";
 import { Task, TASK_PRIORITY_LABELS } from "@/lib/types";
 import { formatDate, fullName } from "@/lib/utils";
 import { Plus } from "lucide-react";
+import NoOrgSelected from "@/components/NoOrgSelected";
 
 const PRIORITY_COLOR: Record<string, string> = {
   laag: "#94a3b8",
@@ -21,7 +22,7 @@ type Filter = "open" | "done" | "all" | "overdue";
 
 export default function TasksPage() {
   const supabase = createClient();
-  const { activeOrgId, isAllOrgsMode } = useActiveOrg();
+  const { activeOrgId, isAllOrgsMode, hasActiveOrg } = useActiveOrg();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>("open");
@@ -40,9 +41,13 @@ export default function TasksPage() {
   }
 
   useEffect(() => {
+    if (!hasActiveOrg) {
+      setLoading(false);
+      return;
+    }
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeOrgId, isAllOrgsMode]);
+  }, [activeOrgId, isAllOrgsMode, hasActiveOrg]);
 
   async function toggleDone(task: Task) {
     setTasks((prev) =>
@@ -68,6 +73,10 @@ export default function TasksPage() {
       return true;
     });
   }, [tasks, filter]);
+
+  if (!hasActiveOrg) {
+    return <NoOrgSelected />;
+  }
 
   return (
     <div>

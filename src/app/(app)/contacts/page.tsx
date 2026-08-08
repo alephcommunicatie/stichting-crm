@@ -10,6 +10,7 @@ import ContactFormModal from "@/components/contacts/ContactFormModal";
 import { Contact, RELATION_TYPE_LABELS, RelationType } from "@/lib/types";
 import { fullName, initials } from "@/lib/utils";
 import { Plus, Search } from "lucide-react";
+import NoOrgSelected from "@/components/NoOrgSelected";
 
 const RELATION_COLORS: Record<string, string> = {
   donateur: "#16a34a",
@@ -23,7 +24,7 @@ const RELATION_COLORS: Record<string, string> = {
 
 export default function ContactsPage() {
   const supabase = createClient();
-  const { activeOrgId, isAllOrgsMode } = useActiveOrg();
+  const { activeOrgId, isAllOrgsMode, hasActiveOrg } = useActiveOrg();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -40,9 +41,13 @@ export default function ContactsPage() {
   }
 
   useEffect(() => {
+    if (!hasActiveOrg) {
+      setLoading(false);
+      return;
+    }
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeOrgId, isAllOrgsMode]);
+  }, [activeOrgId, isAllOrgsMode, hasActiveOrg]);
 
   const filtered = useMemo(() => {
     return contacts.filter((c) => {
@@ -55,6 +60,10 @@ export default function ContactsPage() {
       return matchesSearch && matchesRelation;
     });
   }, [contacts, search, relationFilter]);
+
+  if (!hasActiveOrg) {
+    return <NoOrgSelected />;
+  }
 
   return (
     <div>

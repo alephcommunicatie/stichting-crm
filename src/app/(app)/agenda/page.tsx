@@ -24,6 +24,7 @@ import {
   Copy,
   Check,
 } from "lucide-react";
+import NoOrgSelected from "@/components/NoOrgSelected";
 
 const APPOINTMENT_TYPES: InteractionType[] = ["meeting", "event"];
 
@@ -129,7 +130,7 @@ function dateHeaderLabel(dateKey: string): string {
 
 export default function AgendaPage() {
   const supabase = createClient();
-  const { activeOrgId, isAllOrgsMode } = useActiveOrg();
+  const { activeOrgId, isAllOrgsMode, hasActiveOrg } = useActiveOrg();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [interactions, setInteractions] = useState<Interaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -231,9 +232,13 @@ export default function AgendaPage() {
   }
 
   useEffect(() => {
+    if (!hasActiveOrg) {
+      setLoading(false);
+      return;
+    }
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeOrgId, isAllOrgsMode]);
+  }, [activeOrgId, isAllOrgsMode, hasActiveOrg]);
 
   async function toggleDone(task: Task) {
     setTasks((prev) =>
@@ -325,6 +330,10 @@ export default function AgendaPage() {
 
   const hours = Array.from({ length: HOUR_END - HOUR_START + 1 }, (_, i) => HOUR_START + i);
   const feedUrl = feedToken ? `https://stichting-crm.vercel.app/api/calendar/feed?token=${feedToken}` : "";
+
+  if (!hasActiveOrg) {
+    return <NoOrgSelected />;
+  }
 
   return (
     <div>

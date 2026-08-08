@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useActiveOrg } from "@/components/OrgProvider";
+import { ALL_ORGS_ID } from "@/lib/organizations";
 import PageHeader from "@/components/PageHeader";
 import StatCard from "@/components/StatCard";
 import { Deal, Task, PipelineStage, Interaction, Contact } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
-import { Users, Wallet, CheckSquare, Activity } from "lucide-react";
+import { Users, Wallet, CheckSquare, Activity, Building2, ArrowRight, Wrench } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -28,15 +30,42 @@ const SEQUENTIAL_BLUE = "#2a78d6";
 
 export default function DashboardPage() {
   const supabase = createClient();
-  const { activeOrgId, isAllOrgsMode } = useActiveOrg();
+  const router = useRouter();
+  const { activeOrgId, isAllOrgsMode, hasActiveOrg, memberships, isDeveloper } = useActiveOrg();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
   const [stages, setStages] = useState<PipelineStage[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [interactions, setInteractions] = useState<Interaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selecting, setSelecting] = useState<string | null>(null);
+  const [pickError, setPickError] = useState<string | null>(null);
+
+  async function chooseOrganization(organizationId: string) {
+    setSelecting(organizationId);
+    setPickError(null);
+    try {
+      const res = await fetch("/api/organization/select", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ organization_id: organizationId }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error || "Kiezen mislukt");
+      }
+      router.refresh();
+    } catch (err) {
+      setPickError(err instanceof Error ? err.message : "Kiezen mislukt");
+      setSelecting(null);
+    }
+  }
 
   useEffect(() => {
+    if (!hasActiveOrg) {
+      setLoading(false);
+      return;
+    }
     async function load() {
       let contactsQuery = supabase.from("contacts").select("*");
       let dealsQuery = supabase.from("deals").select("*");
@@ -105,6 +134,63 @@ export default function DashboardPage() {
     }
     return months;
   }, [interactions]);
+
+  if (!hasActiveOrg) {
+    return (
+      <div>
+        <PageHeader title="Dashboard" description="Kies een organisatie om verder te gaan" />
+        <div className="px-4 sm:px-8 py-6">
+          <p className="text-sm text-muted mb-5">
+            Kies hieronder de organisatie waarmee je wilt werken. Je komt dan in het aparte gedeelte van
+            het CRM met pipeline, taken, agenda en e-mail voor die organisatie.
+          </p>
+
+          {pickError && (
+            <div className="mb-4 text-sm text-danger bg-danger/10 border border-danger/20 rounded-lg px-3 py-2 max-w-md">
+              {pickError}
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-3xl">
+            {memberships.map((m) => (
+              <button
+                key={m.id}
+                onClick={() => chooseOrganization(m.id)}
+                disabled={selecting !== null}
+                className="card p-5 text-left flex items-center gap-3 hover:border-primary transition-colors disabled:opacity-60"
+              >
+                <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <Building2 size={18} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{m.name}</p>
+                  <p className="text-xs text-muted">{m.role === "owner" ? "Eigenaar" : "Lid"}</p>
+                </div>
+                <ArrowRight size={16} className="text-muted shrink-0" />
+              </button>
+            ))}
+
+            {isDeveloper && (
+              <button
+                onClick={() => chooseOrganization(ALL_ORGS_ID)}
+                disabled={selecting !== null}
+                className="card p-5 text-left flex items-center gap-3 hover:border-primary transition-colors disabled:opacity-60 border-dashed"
+              >
+                <div className="w-10 h-10 rounded-lg bg-[#d97706]/10 text-[#d97706] flex items-center justify-center shrink-0">
+                  <Wrench size={18} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">Alle organisaties</p>
+                  <p className="text-xs text-muted">Developer-modus</p>
+                </div>
+                <ArrowRight size={16} className="text-muted shrink-0" />
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>

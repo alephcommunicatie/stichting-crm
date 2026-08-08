@@ -19,6 +19,7 @@ import {
   useDroppable,
   useDraggable,
 } from "@dnd-kit/core";
+import NoOrgSelected from "@/components/NoOrgSelected";
 
 function DealCard({ deal, onEdit }: { deal: Deal; onEdit?: (deal: Deal) => void }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
@@ -92,7 +93,7 @@ function StageColumn({
 
 export default function PipelinePage() {
   const supabase = createClient();
-  const { activeOrgId, isAllOrgsMode } = useActiveOrg();
+  const { activeOrgId, isAllOrgsMode, hasActiveOrg } = useActiveOrg();
   const [stages, setStages] = useState<PipelineStage[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -116,9 +117,13 @@ export default function PipelinePage() {
   }
 
   useEffect(() => {
+    if (!hasActiveOrg) {
+      setLoading(false);
+      return;
+    }
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeOrgId, isAllOrgsMode]);
+  }, [activeOrgId, isAllOrgsMode, hasActiveOrg]);
 
   const dealsByStage = useMemo(() => {
     const map: Record<string, Deal[]> = {};
@@ -158,6 +163,10 @@ export default function PipelinePage() {
   }
 
   const activeDeal = deals.find((d) => d.id === activeId);
+
+  if (!hasActiveOrg) {
+    return <NoOrgSelected />;
+  }
 
   return (
     <div className="flex flex-col h-[calc(100vh-3.5rem)] lg:h-screen">
