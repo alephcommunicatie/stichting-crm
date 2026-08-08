@@ -58,16 +58,16 @@ export default function LoginPage() {
         </div>
 
         <div className="card p-6">
-          <div className="flex mb-6 rounded-lg bg-gray-100 p-1 text-sm font-medium">
+          <div className="flex mb-6 rounded-lg bg-gray-100 dark:bg-white/5 p-1 text-sm font-medium">
             <button
-              className={`flex-1 rounded-md py-1.5 transition ${mode === "login" ? "bg-white shadow-sm" : "text-muted"}`}
+              className={`flex-1 rounded-md py-1.5 transition ${mode === "login" ? "bg-card shadow-sm" : "text-muted"}`}
               onClick={() => setMode("login")}
               type="button"
             >
               Inloggen
             </button>
             <button
-              className={`flex-1 rounded-md py-1.5 transition ${mode === "signup" ? "bg-white shadow-sm" : "text-muted"}`}
+              className={`flex-1 rounded-md py-1.5 transition ${mode === "signup" ? "bg-card shadow-sm" : "text-muted"}`}
               onClick={() => setMode("signup")}
               type="button"
             >

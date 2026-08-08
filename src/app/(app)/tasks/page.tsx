@@ -97,7 +97,7 @@ export default function TasksPage() {
               key={f}
               onClick={() => setFilter(f)}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
-                filter === f ? "bg-primary text-white" : "bg-white border border-border text-muted"
+                filter === f ? "bg-primary text-white" : "bg-card border border-border text-muted"
               }`}
             >
               {f === "open" ? "Open" : f === "done" ? "Afgerond" : f === "overdue" ? "Verlopen" : "Alle"}
@@ -113,7 +113,7 @@ export default function TasksPage() {
             {filtered.map((t) => {
               const overdue = t.status === "open" && t.due_date && new Date(t.due_date) < today;
               return (
-                <li key={t.id} className="flex items-center gap-3 px-5 py-3 border-b border-border last:border-0 hover:bg-gray-50">
+                <li key={t.id} className="flex items-center gap-3 px-5 py-3 border-b border-border last:border-0 hover:bg-gray-50 dark:hover:bg-white/5">
                   <input type="checkbox" checked={t.status === "done"} onChange={() => toggleDone(t)} />
                   <div className="flex-1 min-w-0">
                     <p className={`text-sm ${t.status === "done" ? "line-through text-muted" : ""}`}>{t.title}</p>

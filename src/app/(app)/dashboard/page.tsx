@@ -219,7 +219,7 @@ export default function DashboardPage() {
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors disabled:opacity-60 ${
                       isActive
                         ? "bg-primary text-white border-primary"
-                        : "bg-white text-foreground border-border hover:border-primary"
+                        : "bg-card text-foreground border-border hover:border-primary"
                     }`}
                   >
                     <Building2 size={14} />
@@ -234,7 +234,7 @@ export default function DashboardPage() {
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors disabled:opacity-60 ${
                     isAllOrgsMode
                       ? "bg-[#d97706] text-white border-[#d97706]"
-                      : "bg-white text-foreground border-border border-dashed hover:border-[#d97706]"
+                      : "bg-card text-foreground border-border border-dashed hover:border-[#d97706]"
                   }`}
                 >
                   <Wrench size={14} />

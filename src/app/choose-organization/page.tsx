@@ -116,7 +116,7 @@ export default function ChooseOrganizationPage() {
               key={m.organization_id}
               onClick={() => choose(m.organization_id)}
               disabled={selecting !== null}
-              className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 text-left disabled:opacity-60 transition"
+              className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 text-left disabled:opacity-60 transition"
             >
               <div>
                 <p className="text-sm font-medium">{m.organizations?.name || "Onbekend"}</p>

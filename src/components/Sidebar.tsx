@@ -18,6 +18,7 @@ import {
   Repeat,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -77,7 +78,7 @@ export default function Sidebar({
               "flex items-center gap-3 px-3 py-2.5 lg:py-2 rounded-lg text-sm font-medium transition",
               active
                 ? "bg-primary-soft text-primary"
-                : "text-gray-600 hover:bg-gray-100"
+                : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/10"
             )}
           >
             <Icon size={17} />
@@ -89,7 +90,11 @@ export default function Sidebar({
   );
 
   const userFooter = (
-    <div className="p-3 border-t border-border">
+    <div className="p-3 border-t border-border space-y-2">
+      <div className="flex items-center justify-between px-2">
+        <span className="text-[10px] uppercase tracking-wide text-muted">Thema</span>
+        <ThemeToggle />
+      </div>
       <div className="flex items-center gap-2 px-2 py-2">
         <div className="w-8 h-8 rounded-full bg-primary-soft text-primary flex items-center justify-center text-xs font-semibold shrink-0">
           {(userName || userEmail || "?")[0]?.toUpperCase()}
@@ -101,7 +106,7 @@ export default function Sidebar({
         <button
           onClick={handleSignOut}
           title="Uitloggen"
-          className="text-muted hover:text-danger transition p-1.5 rounded-md hover:bg-gray-100"
+          className="text-muted hover:text-danger transition p-1.5 rounded-md hover:bg-gray-100 dark:hover:bg-white/10"
         >
           <LogOut size={15} />
         </button>
@@ -116,7 +121,7 @@ export default function Sidebar({
         <button
           onClick={() => setOpen(true)}
           aria-label="Menu openen"
-          className="p-2 -ml-2 rounded-md text-gray-600 hover:bg-gray-100"
+          className="p-2 -ml-2 rounded-md text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/10"
         >
           <Menu size={20} />
         </button>
@@ -154,7 +159,7 @@ export default function Sidebar({
           <button
             onClick={() => setOpen(false)}
             aria-label="Menu sluiten"
-            className="lg:hidden p-1.5 rounded-md text-muted hover:bg-gray-100"
+            className="lg:hidden p-1.5 rounded-md text-muted hover:bg-gray-100 dark:hover:bg-white/10"
           >
             <X size={18} />
           </button>
@@ -162,7 +167,7 @@ export default function Sidebar({
 
         {activeOrgName && (
           <div className="px-3 pt-3">
-            <div className="px-2 py-2 rounded-lg bg-gray-50 border border-border">
+            <div className="px-2 py-2 rounded-lg bg-gray-50 dark:bg-white/5 border border-border">
               <p className="text-[10px] uppercase tracking-wide text-muted">Organisatie</p>
               <p className="text-sm font-medium truncate">{activeOrgName}</p>
               {showSwitcher && (

@@ -355,7 +355,7 @@ export default function AgendaPage() {
                 key={v}
                 onClick={() => setViewMode(v)}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
-                  viewMode === v ? "bg-primary text-white" : "bg-white border border-border text-muted"
+                  viewMode === v ? "bg-primary text-white" : "bg-card border border-border text-muted"
                 }`}
               >
                 {v === "lijst" ? "Lijst" : v === "week" ? "Week" : "Maand"}
@@ -370,7 +370,7 @@ export default function AgendaPage() {
                   key={f}
                   onClick={() => setFilter(f)}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
-                    filter === f ? "bg-primary text-white" : "bg-white border border-border text-muted"
+                    filter === f ? "bg-primary text-white" : "bg-card border border-border text-muted"
                   }`}
                 >
                   {f === "aankomend" ? "Aankomend" : f === "verleden" ? "Verleden" : "Alles"}
@@ -382,7 +382,7 @@ export default function AgendaPage() {
               <button
                 onClick={goPrev}
                 aria-label="Vorige"
-                className="p-1.5 rounded-md border border-border text-muted hover:bg-gray-100"
+                className="p-1.5 rounded-md border border-border text-muted hover:bg-gray-100 dark:hover:bg-white/10"
               >
                 <ChevronLeft size={16} />
               </button>
@@ -392,7 +392,7 @@ export default function AgendaPage() {
               <button
                 onClick={goNext}
                 aria-label="Volgende"
-                className="p-1.5 rounded-md border border-border text-muted hover:bg-gray-100"
+                className="p-1.5 rounded-md border border-border text-muted hover:bg-gray-100 dark:hover:bg-white/10"
               >
                 <ChevronRight size={16} />
               </button>
@@ -515,7 +515,7 @@ export default function AgendaPage() {
                             if (task) toggleDone(task);
                           }}
                           className={`w-full text-left text-[11px] px-1.5 py-0.5 rounded truncate ${
-                            item.done ? "bg-gray-100 text-muted line-through" : "bg-primary-soft text-primary"
+                            item.done ? "bg-gray-100 dark:bg-white/10 text-muted line-through" : "bg-primary-soft text-primary"
                           }`}
                           title={item.title}
                         >
@@ -616,12 +616,12 @@ export default function AgendaPage() {
                     <div
                       key={key}
                       className={`border-b border-r border-border last:border-r-0 p-1.5 min-h-[92px] ${
-                        inMonth ? "" : "bg-gray-50/50"
+                        inMonth ? "" : "bg-gray-50/50 dark:bg-white/[0.03]"
                       }`}
                     >
                       <p
                         className={`text-xs mb-1 inline-flex items-center justify-center w-5 h-5 rounded-full ${
-                          isToday ? "bg-primary text-white" : inMonth ? "text-gray-700" : "text-muted"
+                          isToday ? "bg-primary text-white" : inMonth ? "text-gray-700 dark:text-gray-300" : "text-muted"
                         }`}
                       >
                         {day.getDate()}

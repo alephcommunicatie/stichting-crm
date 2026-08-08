@@ -34,7 +34,7 @@ export default function Modal({
           <h2 className="text-base font-semibold">{title}</h2>
           <button
             onClick={onClose}
-            className="text-muted hover:text-foreground p-1 rounded-md hover:bg-gray-100"
+            className="text-muted hover:text-foreground p-1 rounded-md hover:bg-gray-100 dark:hover:bg-white/10"
           >
             <X size={18} />
           </button>

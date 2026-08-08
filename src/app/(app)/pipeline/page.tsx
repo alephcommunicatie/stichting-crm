@@ -72,7 +72,7 @@ function StageColumn({
   return (
     <div
       ref={setNodeRef}
-      className={`w-72 shrink-0 rounded-xl border border-border bg-gray-50/60 flex flex-col ${isOver ? "ring-2 ring-primary" : ""}`}
+      className={`w-72 shrink-0 rounded-xl border border-border bg-gray-50/60 dark:bg-white/5 flex flex-col ${isOver ? "ring-2 ring-primary" : ""}`}
     >
       <div className="px-3 py-3 border-b border-border">
         <div className="flex items-center gap-2">

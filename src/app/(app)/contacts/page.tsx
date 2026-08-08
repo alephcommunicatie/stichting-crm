@@ -122,7 +122,7 @@ export default function ContactsPage() {
                 </tr>
               )}
               {filtered.map((c) => (
-                <tr key={c.id} className="border-b border-border last:border-0 hover:bg-gray-50">
+                <tr key={c.id} className="border-b border-border last:border-0 hover:bg-gray-50 dark:hover:bg-white/5">
                   <td className="px-5 py-3">
                     <Link href={`/contacts/${c.id}`} className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-primary-soft text-primary flex items-center justify-center text-xs font-semibold shrink-0">

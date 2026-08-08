@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Makes Tailwind's dark: variant respond to a .dark class on an ancestor
+   (toggled by ThemeToggle) instead of only the OS-level color scheme. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #f4f5f7;
   --foreground: #1e2130;
@@ -11,6 +15,19 @@
   --muted: #6b7280;
   --danger: #dc2626;
   --success: #16a34a;
+}
+
+.dark {
+  --background: #0f1115;
+  --foreground: #e8e9ec;
+  --card: #171a21;
+  --border: #2a2e37;
+  --primary: #818cf8;
+  --primary-hover: #a5b4fc;
+  --primary-soft: #232042;
+  --muted: #9199a6;
+  --danger: #f87171;
+  --success: #4ade80;
 }
 
 @theme inline {
@@ -31,6 +48,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 * {
@@ -62,7 +80,7 @@ body {
 }
 
 .btn-secondary {
-  background: white;
+  background: var(--card);
   color: var(--foreground);
   border: 1px solid var(--border);
   border-radius: 0.5rem;
@@ -72,7 +90,7 @@ body {
   transition: background 0.15s ease;
 }
 .btn-secondary:hover {
-  background: #f9fafb;
+  background: color-mix(in srgb, var(--foreground) 6%, var(--card));
 }
 
 .input {
@@ -81,7 +99,8 @@ body {
   border-radius: 0.5rem;
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
-  background: white;
+  background: var(--card);
+  color: var(--foreground);
   outline: none;
 }
 .input:focus {
