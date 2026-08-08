@@ -1,3 +1,5 @@
+import ThemeToggle from "@/components/ThemeToggle";
+
 export default function PageHeader({
   title,
   description,
@@ -13,7 +15,10 @@ export default function PageHeader({
         {title && <h1 className="text-lg font-semibold truncate">{title}</h1>}
         {description && <p className="text-sm text-muted mt-0.5">{description}</p>}
       </div>
-      {action && <div className="shrink-0">{action}</div>}
+      <div className="flex items-center gap-4 shrink-0">
+        {action}
+        <ThemeToggle className="hidden sm:flex" />
+      </div>
     </div>
   );
 }

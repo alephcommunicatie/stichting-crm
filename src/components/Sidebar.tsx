@@ -129,6 +129,7 @@ export default function Sidebar({
           <Building2 className="text-white" size={14} />
         </div>
         <span className="font-semibold text-sm">RelatieCRM</span>
+        <ThemeToggle className="ml-auto" />
       </div>
 
       {/* Mobile drawer backdrop */}
