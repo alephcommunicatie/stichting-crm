@@ -3,14 +3,17 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { useActiveOrg } from "@/components/OrgProvider";
 import PageHeader from "@/components/PageHeader";
 import Badge from "@/components/ui/Badge";
 import OrganizationFormModal from "@/components/organizations/OrganizationFormModal";
+import NoOrgSelected from "@/components/NoOrgSelected";
 import { Organization, ORGANIZATION_TYPE_LABELS } from "@/lib/types";
 import { Plus, Search, Building2 } from "lucide-react";
 
 export default function OrganizationsPage() {
   const supabase = createClient();
+  const { activeOrgId, isAllOrgsMode, hasActiveOrg } = useActiveOrg();
   const [orgs, setOrgs] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -18,19 +21,32 @@ export default function OrganizationsPage() {
 
   async function load() {
     setLoading(true);
-    const { data } = await supabase.from("organizations").select("*").order("name");
+    // Only the CRM organization records that belong to a tenant (never
+    // the root stichting rows themselves) show up here.
+    let query = supabase.from("organizations").select("*").not("organization_id", "is", null).order("name");
+    if (!isAllOrgsMode) query = query.eq("organization_id", activeOrgId);
+    const { data } = await query;
     setOrgs((data as Organization[]) || []);
     setLoading(false);
   }
 
   useEffect(() => {
+    if (!hasActiveOrg) {
+      setLoading(false);
+      return;
+    }
     load();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeOrgId, isAllOrgsMode, hasActiveOrg]);
 
   const filtered = useMemo(
     () => orgs.filter((o) => !search || o.name.toLowerCase().includes(search.toLowerCase())),
     [orgs, search]
   );
+
+  if (!hasActiveOrg) {
+    return <NoOrgSelected />;
+  }
 
   return (
     <div>

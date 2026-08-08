@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Modal from "@/components/ui/Modal";
+import { useActiveOrg } from "@/components/OrgProvider";
 import { Organization, ORGANIZATION_TYPE_LABELS, OrganizationType } from "@/lib/types";
 
 export default function OrganizationFormModal({
@@ -17,6 +18,7 @@ export default function OrganizationFormModal({
   organization?: Organization | null;
 }) {
   const supabase = createClient();
+  const { writeOrgId } = useActiveOrg();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
@@ -84,7 +86,7 @@ export default function OrganizationFormModal({
 
     const { error } = organization
       ? await supabase.from("organizations").update(payload).eq("id", organization.id)
-      : await supabase.from("organizations").insert(payload);
+      : await supabase.from("organizations").insert({ ...payload, organization_id: writeOrgId });
 
     setSaving(false);
     if (error) {

@@ -4,35 +4,25 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { Organization, Contact, ORGANIZATION_TYPE_LABELS } from "@/lib/types";
-import { formatDate, initials, fullName } from "@/lib/utils";
+import { Organization, ORGANIZATION_TYPE_LABELS } from "@/lib/types";
+import { formatDate } from "@/lib/utils";
 import PageHeader from "@/components/PageHeader";
 import Badge from "@/components/ui/Badge";
 import OrganizationFormModal from "@/components/organizations/OrganizationFormModal";
-import ContactFormModal from "@/components/contacts/ContactFormModal";
-import InteractionTimeline from "@/components/InteractionTimeline";
-import RelatedTasks from "@/components/RelatedTasks";
-import RelatedDeals from "@/components/RelatedDeals";
-import { ArrowLeft, Mail, Phone, MapPin, Globe, Pencil, Trash2, Plus } from "lucide-react";
+import { ArrowLeft, Mail, Phone, MapPin, Globe, Pencil, Trash2 } from "lucide-react";
 
 export default function OrganizationDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const supabase = createClient();
   const [org, setOrg] = useState<Organization | null>(null);
-  const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
-  const [contactModalOpen, setContactModalOpen] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [{ data: orgData }, { data: contactsData }] = await Promise.all([
-      supabase.from("organizations").select("*").eq("id", params.id).maybeSingle(),
-      supabase.from("contacts").select("*").eq("organization_id", params.id).order("first_name"),
-    ]);
+    const { data: orgData } = await supabase.from("organizations").select("*").eq("id", params.id).maybeSingle();
     setOrg(orgData as Organization | null);
-    setContacts((contactsData as Contact[]) || []);
     setLoading(false);
   }, [params.id, supabase]);
 
@@ -65,7 +55,7 @@ export default function OrganizationDetailPage() {
         }
       />
 
-      <div className="px-4 sm:px-8 py-6 max-w-6xl">
+      <div className="px-4 sm:px-8 py-6 max-w-3xl">
         <Link href="/organizations" className="text-sm text-muted hover:text-primary flex items-center gap-1 mb-4">
           <ArrowLeft size={14} /> Terug naar organisaties
         </Link>
@@ -77,102 +67,55 @@ export default function OrganizationDetailPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="col-span-1 space-y-4">
-            <div className="card p-4 space-y-3 text-sm">
-              {org.email && (
-                <div className="flex items-center gap-2">
-                  <Mail size={14} className="text-muted" />
-                  <a href={`mailto:${org.email}`} className="hover:text-primary">
-                    {org.email}
-                  </a>
-                </div>
-              )}
-              {org.phone && (
-                <div className="flex items-center gap-2">
-                  <Phone size={14} className="text-muted" />
-                  <span>{org.phone}</span>
-                </div>
-              )}
-              {org.website && (
-                <div className="flex items-center gap-2">
-                  <Globe size={14} className="text-muted" />
-                  <a href={org.website} target="_blank" rel="noreferrer" className="hover:text-primary truncate">
-                    {org.website}
-                  </a>
-                </div>
-              )}
-              {(org.address || org.city) && (
-                <div className="flex items-start gap-2">
-                  <MapPin size={14} className="text-muted mt-0.5" />
-                  <span>
-                    {org.address}
-                    {org.address && <br />}
-                    {org.postal_code} {org.city}
-                  </span>
-                </div>
-              )}
-              <div className="pt-2 border-t border-border text-xs text-muted">
-                Toegevoegd op {formatDate(org.created_at)}
-              </div>
-            </div>
-
-            {org.notes && (
-              <div className="card p-4">
-                <h3 className="text-sm font-semibold mb-2">Notities</h3>
-                <p className="text-sm text-muted whitespace-pre-wrap">{org.notes}</p>
+        <div className="space-y-4">
+          <div className="card p-4 space-y-3 text-sm">
+            {org.email && (
+              <div className="flex items-center gap-2">
+                <Mail size={14} className="text-muted" />
+                <a href={`mailto:${org.email}`} className="hover:text-primary">
+                  {org.email}
+                </a>
               </div>
             )}
-
-            <div className="card p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold">Contactpersonen</h3>
-                <button
-                  className="btn-secondary flex items-center gap-1 text-xs py-1.5"
-                  onClick={() => setContactModalOpen(true)}
-                >
-                  <Plus size={14} /> Persoon
-                </button>
+            {org.phone && (
+              <div className="flex items-center gap-2">
+                <Phone size={14} className="text-muted" />
+                <span>{org.phone}</span>
               </div>
-              {contacts.length === 0 && <p className="text-sm text-muted">Geen contactpersonen.</p>}
-              <ul className="space-y-2">
-                {contacts.map((c) => (
-                  <li key={c.id}>
-                    <Link href={`/contacts/${c.id}`} className="flex items-center gap-2 hover:text-primary">
-                      <div className="w-7 h-7 rounded-full bg-primary-soft text-primary flex items-center justify-center text-xs font-semibold shrink-0">
-                        {initials(c.first_name, c.last_name)}
-                      </div>
-                      <span className="text-sm">{fullName(c)}</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="card p-4">
-              <RelatedTasks organizationId={org.id} />
-            </div>
-
-            <div className="card p-4">
-              <RelatedDeals organizationId={org.id} />
-            </div>
-          </div>
-
-          <div className="col-span-2">
-            <div className="card p-4">
-              <InteractionTimeline organizationId={org.id} />
+            )}
+            {org.website && (
+              <div className="flex items-center gap-2">
+                <Globe size={14} className="text-muted" />
+                <a href={org.website} target="_blank" rel="noreferrer" className="hover:text-primary truncate">
+                  {org.website}
+                </a>
+              </div>
+            )}
+            {(org.address || org.city) && (
+              <div className="flex items-start gap-2">
+                <MapPin size={14} className="text-muted mt-0.5" />
+                <span>
+                  {org.address}
+                  {org.address && <br />}
+                  {org.postal_code} {org.city}
+                </span>
+              </div>
+            )}
+            <div className="pt-2 border-t border-border text-xs text-muted">
+              Toegevoegd op {formatDate(org.created_at)}
             </div>
           </div>
+
+          {org.notes && (
+            <div className="card p-4">
+              <h3 className="text-sm font-semibold mb-2">Notities</h3>
+              <p className="text-sm text-muted whitespace-pre-wrap">{org.notes}</p>
+            </div>
+          )}
         </div>
       </div>
 
       <OrganizationFormModal open={editOpen} onClose={() => setEditOpen(false)} onSaved={load} organization={org} />
-      <ContactFormModal
-        open={contactModalOpen}
-        onClose={() => setContactModalOpen(false)}
-        onSaved={load}
-        defaultOrganizationId={org.id}
-      />
     </div>
   );
 }

@@ -37,6 +37,7 @@ export interface Organization {
   id: string;
   name: string;
   type: OrganizationType;
+  organization_id: string | null;
   website: string | null;
   phone: string | null;
   email: string | null;
