@@ -129,7 +129,7 @@ function dateHeaderLabel(dateKey: string): string {
 
 export default function AgendaPage() {
   const supabase = createClient();
-  const { activeOrgId } = useActiveOrg();
+  const { activeOrgId, isAllOrgsMode } = useActiveOrg();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [interactions, setInteractions] = useState<Interaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -210,20 +210,21 @@ export default function AgendaPage() {
 
   async function load() {
     setLoading(true);
-    const [{ data: tasksData }, { data: interactionsData }] = await Promise.all([
-      supabase
-        .from("tasks")
-        .select("*, contacts(*), organizations(*)")
-        .eq("organization_id", activeOrgId)
-        .not("due_date", "is", null)
-        .order("due_date", { ascending: true }),
-      supabase
-        .from("interactions")
-        .select("*, contacts(*), organizations(*)")
-        .eq("organization_id", activeOrgId)
-        .in("type", APPOINTMENT_TYPES)
-        .order("interaction_date", { ascending: true }),
-    ]);
+    let tasksQuery = supabase
+      .from("tasks")
+      .select("*, contacts(*), organizations(*)")
+      .not("due_date", "is", null)
+      .order("due_date", { ascending: true });
+    let interactionsQuery = supabase
+      .from("interactions")
+      .select("*, contacts(*), organizations(*)")
+      .in("type", APPOINTMENT_TYPES)
+      .order("interaction_date", { ascending: true });
+    if (!isAllOrgsMode) {
+      tasksQuery = tasksQuery.eq("organization_id", activeOrgId);
+      interactionsQuery = interactionsQuery.eq("organization_id", activeOrgId);
+    }
+    const [{ data: tasksData }, { data: interactionsData }] = await Promise.all([tasksQuery, interactionsQuery]);
     setTasks((tasksData as Task[]) || []);
     setInteractions((interactionsData as Interaction[]) || []);
     setLoading(false);
@@ -232,7 +233,7 @@ export default function AgendaPage() {
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeOrgId]);
+  }, [activeOrgId, isAllOrgsMode]);
 
   async function toggleDone(task: Task) {
     setTasks((prev) =>

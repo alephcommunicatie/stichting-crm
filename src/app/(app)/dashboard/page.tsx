@@ -28,7 +28,7 @@ const SEQUENTIAL_BLUE = "#2a78d6";
 
 export default function DashboardPage() {
   const supabase = createClient();
-  const { activeOrgId } = useActiveOrg();
+  const { activeOrgId, isAllOrgsMode } = useActiveOrg();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
   const [stages, setStages] = useState<PipelineStage[]>([]);
@@ -38,17 +38,26 @@ export default function DashboardPage() {
 
   useEffect(() => {
     async function load() {
+      let contactsQuery = supabase.from("contacts").select("*");
+      let dealsQuery = supabase.from("deals").select("*");
+      let tasksQuery = supabase.from("tasks").select("*");
+      let interactionsQuery = supabase
+        .from("interactions")
+        .select("*")
+        .order("interaction_date", { ascending: false })
+        .limit(500);
+      if (!isAllOrgsMode) {
+        contactsQuery = contactsQuery.eq("organization_id", activeOrgId);
+        dealsQuery = dealsQuery.eq("organization_id", activeOrgId);
+        tasksQuery = tasksQuery.eq("organization_id", activeOrgId);
+        interactionsQuery = interactionsQuery.eq("organization_id", activeOrgId);
+      }
       const [c, d, s, t, i] = await Promise.all([
-        supabase.from("contacts").select("*").eq("organization_id", activeOrgId),
-        supabase.from("deals").select("*").eq("organization_id", activeOrgId),
+        contactsQuery,
+        dealsQuery,
         supabase.from("pipeline_stages").select("*").order("position"),
-        supabase.from("tasks").select("*").eq("organization_id", activeOrgId),
-        supabase
-          .from("interactions")
-          .select("*")
-          .eq("organization_id", activeOrgId)
-          .order("interaction_date", { ascending: false })
-          .limit(500),
+        tasksQuery,
+        interactionsQuery,
       ]);
       setContacts((c.data as Contact[]) || []);
       setDeals((d.data as Deal[]) || []);
@@ -59,7 +68,7 @@ export default function DashboardPage() {
     }
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeOrgId]);
+  }, [activeOrgId, isAllOrgsMode]);
 
   const openDeals = useMemo(() => deals.filter((d) => d.status === "open"), [deals]);
   const pipelineValue = openDeals.reduce((s, d) => s + Number(d.amount), 0);

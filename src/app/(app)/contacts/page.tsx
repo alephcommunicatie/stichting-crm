@@ -23,7 +23,7 @@ const RELATION_COLORS: Record<string, string> = {
 
 export default function ContactsPage() {
   const supabase = createClient();
-  const { activeOrgId } = useActiveOrg();
+  const { activeOrgId, isAllOrgsMode } = useActiveOrg();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -32,11 +32,9 @@ export default function ContactsPage() {
 
   async function load() {
     setLoading(true);
-    const { data } = await supabase
-      .from("contacts")
-      .select("*, organizations(*)")
-      .eq("organization_id", activeOrgId)
-      .order("created_at", { ascending: false });
+    let query = supabase.from("contacts").select("*, organizations(*)").order("created_at", { ascending: false });
+    if (!isAllOrgsMode) query = query.eq("organization_id", activeOrgId);
+    const { data } = await query;
     setContacts((data as Contact[]) || []);
     setLoading(false);
   }
@@ -44,7 +42,7 @@ export default function ContactsPage() {
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeOrgId]);
+  }, [activeOrgId, isAllOrgsMode]);
 
   const filtered = useMemo(() => {
     return contacts.filter((c) => {

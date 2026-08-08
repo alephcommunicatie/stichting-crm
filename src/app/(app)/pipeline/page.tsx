@@ -92,7 +92,7 @@ function StageColumn({
 
 export default function PipelinePage() {
   const supabase = createClient();
-  const { activeOrgId } = useActiveOrg();
+  const { activeOrgId, isAllOrgsMode } = useActiveOrg();
   const [stages, setStages] = useState<PipelineStage[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
@@ -104,14 +104,11 @@ export default function PipelinePage() {
 
   async function load() {
     setLoading(true);
+    let dealsQuery = supabase.from("deals").select("*").eq("status", "open").order("created_at", { ascending: false });
+    if (!isAllOrgsMode) dealsQuery = dealsQuery.eq("organization_id", activeOrgId);
     const [{ data: stagesData }, { data: dealsData }] = await Promise.all([
       supabase.from("pipeline_stages").select("*").order("position"),
-      supabase
-        .from("deals")
-        .select("*")
-        .eq("status", "open")
-        .eq("organization_id", activeOrgId)
-        .order("created_at", { ascending: false }),
+      dealsQuery,
     ]);
     setStages((stagesData as PipelineStage[]) || []);
     setDeals((dealsData as Deal[]) || []);
@@ -121,7 +118,7 @@ export default function PipelinePage() {
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeOrgId]);
+  }, [activeOrgId, isAllOrgsMode]);
 
   const dealsByStage = useMemo(() => {
     const map: Record<string, Deal[]> = {};

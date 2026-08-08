@@ -24,7 +24,7 @@ export default function DealFormModal({
   initialTitle?: string;
 }) {
   const supabase = createClient();
-  const { activeOrgId } = useActiveOrg();
+  const { writeOrgId } = useActiveOrg();
   const [stages, setStages] = useState<PipelineStage[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -87,7 +87,7 @@ export default function DealFormModal({
       probability: Number(form.probability) || 0,
       notes: form.notes || null,
       contact_id: deal?.contact_id ?? defaultContactId ?? null,
-      organization_id: deal?.organization_id ?? defaultOrganizationId ?? activeOrgId,
+      organization_id: deal?.organization_id ?? defaultOrganizationId ?? writeOrgId,
       created_by: user?.id || null,
     };
 

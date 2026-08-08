@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { Building2, ArrowRight, LogOut } from "lucide-react";
+import { ALL_ORGS_ID } from "@/lib/organizations";
+import { Building2, ArrowRight, LogOut, Wrench } from "lucide-react";
 
 type MembershipRow = {
   organization_id: string;
@@ -15,6 +16,7 @@ export default function ChooseOrganizationPage() {
   const supabase = createClient();
   const router = useRouter();
   const [memberships, setMemberships] = useState<MembershipRow[]>([]);
+  const [isDeveloper, setIsDeveloper] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selecting, setSelecting] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -28,14 +30,20 @@ export default function ChooseOrganizationPage() {
         router.push("/login");
         return;
       }
-      const { data } = await supabase
-        .from("user_organizations")
-        .select("organization_id, role, organizations(name)")
-        .eq("user_id", user.id);
+      const [{ data }, { data: profile }] = await Promise.all([
+        supabase
+          .from("user_organizations")
+          .select("organization_id, role, organizations(name)")
+          .eq("user_id", user.id),
+        supabase.from("profiles").select("is_developer").eq("id", user.id).maybeSingle(),
+      ]);
       const rows = (data || []) as unknown as MembershipRow[];
+      const developer = Boolean((profile as { is_developer: boolean } | null)?.is_developer);
       setMemberships(rows);
+      setIsDeveloper(developer);
       setLoading(false);
-      if (rows.length === 1) {
+      // Skip straight through only when there's truly nothing to choose between.
+      if (rows.length === 1 && !developer) {
         choose(rows[0].organization_id);
       }
     }
@@ -82,10 +90,26 @@ export default function ChooseOrganizationPage() {
 
         <div className="card p-2 space-y-1">
           {loading && <p className="text-sm text-muted p-4">Laden...</p>}
-          {!loading && memberships.length === 0 && (
+          {!loading && memberships.length === 0 && !isDeveloper && (
             <p className="text-sm text-muted p-4">
               Je account is nog niet aan een organisatie gekoppeld. Neem contact op met de beheerder.
             </p>
+          )}
+          {isDeveloper && (
+            <button
+              onClick={() => choose(ALL_ORGS_ID)}
+              disabled={selecting !== null}
+              className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg hover:bg-primary-soft text-left disabled:opacity-60 transition bg-primary-soft/40"
+            >
+              <div className="flex items-center gap-2">
+                <Wrench size={15} className="text-primary" />
+                <div>
+                  <p className="text-sm font-medium">Alle organisaties</p>
+                  <p className="text-xs text-muted">Developer-modus</p>
+                </div>
+              </div>
+              <ArrowRight size={16} className="text-muted" />
+            </button>
           )}
           {memberships.map((m) => (
             <button

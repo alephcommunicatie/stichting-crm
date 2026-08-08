@@ -20,7 +20,7 @@ export default function ContactFormModal({
   defaultOrganizationId?: string | null;
 }) {
   const supabase = createClient();
-  const { activeOrgId } = useActiveOrg();
+  const { writeOrgId } = useActiveOrg();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -61,7 +61,7 @@ export default function ContactFormModal({
         last_name: "",
         email: "",
         phone: "",
-        organization_id: defaultOrganizationId || activeOrgId,
+        organization_id: defaultOrganizationId || writeOrgId,
         relation_type: "overig",
         status: "actief",
         address: "",
@@ -81,7 +81,7 @@ export default function ContactFormModal({
 
     const payload = {
       ...form,
-      organization_id: form.organization_id || activeOrgId,
+      organization_id: form.organization_id || writeOrgId,
       last_name: form.last_name || null,
       email: form.email || null,
       phone: form.phone || null,

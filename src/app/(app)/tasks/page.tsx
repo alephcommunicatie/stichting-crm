@@ -21,7 +21,7 @@ type Filter = "open" | "done" | "all" | "overdue";
 
 export default function TasksPage() {
   const supabase = createClient();
-  const { activeOrgId } = useActiveOrg();
+  const { activeOrgId, isAllOrgsMode } = useActiveOrg();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>("open");
@@ -29,11 +29,12 @@ export default function TasksPage() {
 
   async function load() {
     setLoading(true);
-    const { data } = await supabase
+    let query = supabase
       .from("tasks")
       .select("*, contacts(*), organizations(*)")
-      .eq("organization_id", activeOrgId)
       .order("due_date", { ascending: true, nullsFirst: false });
+    if (!isAllOrgsMode) query = query.eq("organization_id", activeOrgId);
+    const { data } = await query;
     setTasks((data as Task[]) || []);
     setLoading(false);
   }
@@ -41,7 +42,7 @@ export default function TasksPage() {
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeOrgId]);
+  }, [activeOrgId, isAllOrgsMode]);
 
   async function toggleDone(task: Task) {
     setTasks((prev) =>
