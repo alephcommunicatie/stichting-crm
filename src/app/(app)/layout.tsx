@@ -36,7 +36,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <div className="card p-8 max-w-sm text-center">
           <h1 className="text-lg font-semibold mb-2">Geen toegang</h1>
           <p className="text-sm text-muted">
-            Je account is nog niet aan een stichting gekoppeld. Neem contact op met de beheerder.
+            Je account is nog niet aan een organisatie gekoppeld. Neem contact op met de beheerder.
           </p>
         </div>
       </div>

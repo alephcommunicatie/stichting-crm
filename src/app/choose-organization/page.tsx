@@ -76,7 +76,7 @@ export default function ChooseOrganizationPage() {
           <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center mb-3">
             <Building2 className="text-white" size={24} />
           </div>
-          <h1 className="text-xl font-semibold">Kies je stichting</h1>
+          <h1 className="text-xl font-semibold">Kies jouw organisatie</h1>
           <p className="text-sm text-muted">Waar wil je vandaag mee werken?</p>
         </div>
 
@@ -84,7 +84,7 @@ export default function ChooseOrganizationPage() {
           {loading && <p className="text-sm text-muted p-4">Laden...</p>}
           {!loading && memberships.length === 0 && (
             <p className="text-sm text-muted p-4">
-              Je account is nog niet aan een stichting gekoppeld. Neem contact op met de beheerder.
+              Je account is nog niet aan een organisatie gekoppeld. Neem contact op met de beheerder.
             </p>
           )}
           {memberships.map((m) => (
